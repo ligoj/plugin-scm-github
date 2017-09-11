@@ -1,0 +1,5 @@
+parameter.id;data;node.id;subscription.id!
+service:scm:github:url;http://localhost:8120;service:scm:github:dig;
+service:scm:github:user;junit;service:scm:github:dig;
+service:scm:github:auth-key;secret;service:scm:github:dig;
+service:scm:github:repository;gfi-gstack;;1
