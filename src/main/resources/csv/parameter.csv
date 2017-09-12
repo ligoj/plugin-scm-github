@@ -1,5 +1,4 @@
 id;owner.id;data;mandatory;type;mode;secured
-service:scm:github:url;service:scm:github;;true;TEXT;;
-service:scm:github:user;service:scm:github;;true;TEXT;;true
+service:scm:github:user;service:scm:github;;true;TEXT;;
 service:scm:github:auth-key;service:scm:github;;true;TEXT;;true
 service:scm:github:repository;service:scm:github;;true;TEXT;;

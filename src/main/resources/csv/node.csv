@@ -1,2 +1,2 @@
 id;name;refined.id;mode;uiClasses
-service:scm:github;github;service:scm;;fa fa-github
+service:scm:github;github;service:scm;LINK;fa fa-github

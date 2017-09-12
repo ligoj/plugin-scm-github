@@ -2,25 +2,26 @@ define(function () {
 	var current = {
 
 		configureSubscriptionParameters: function (configuration) {
-			current.$super('registerXServiceSelect2')(configuration, 'service:scm:svn:repository', 'service/scm/svn/', null, true, null, false);
+			current.$super('registerXServiceSelect2')(configuration, 'service:scm:github:repository', 'service/scm/github/repos/', null, true, null, false);
 		},
 
 		/**
-		 * Render Subversion repository.
+		 * Render github repository.
 		 */
 		renderKey: function (subscription) {
-			return current.$super('renderKey')(subscription, 'service:scm:svn:repository');
+			return current.$super('renderKey')(subscription, 'service:scm:github:repository');
 		},
 
 		/**
-		 * Render Subversion home page.
+		 * Render github home page.
 		 */
 		renderFeatures: function (subscription) {
-			return current.$super('renderFeaturesScm')(subscription, 'svn');
+			subscription.parameters['service:scm:github:url'] = 'https://github.com/' + subscription.parameters['service:scm:github:user'];
+			return current.$super('renderFeaturesScm')(subscription, 'github');
 		},
 
 		/**
-		 * Render SVN details : id, and amount of revisions.
+		 * Render github details : id, and amount of revisions.
 		 */
 		renderDetailsKey: function (subscription) {
 			return current.$super('generateCarousel')(subscription, [current.renderKey(subscription), '#Revisions : ' + subscription.data.info]);

@@ -1,10 +1,9 @@
 define({
-	'service:scm:github:url': 'URL de base',
-	'service:scm:github:repository': 'Dépôt',
 	'service:scm:github:user': 'Utilisateur',
-	'service:scm:github:password': 'Mot de passe',
+	'service:scm:github:auth-key': 'Clé d\'authentification',
+	'service:scm:github:repository': 'Dépôt',
 	'error': {
 		'github-admin': 'Accès administrateur échoué',
-		'github-repository': 'Dépôt Subversion invalide'
+		'github-repository': 'Dépôt GitHub invalide'
 	}
 });
