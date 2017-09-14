@@ -11,7 +11,6 @@ import java.util.List;
 import javax.transaction.Transactional;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpStatus;
 import org.junit.Assert;
 import org.junit.Before;
@@ -26,6 +25,7 @@ import org.ligoj.app.model.Parameter;
 import org.ligoj.app.model.ParameterValue;
 import org.ligoj.app.model.Project;
 import org.ligoj.app.model.Subscription;
+import org.ligoj.app.plugin.scm.github.client.GitHubContributor;
 import org.ligoj.app.resource.subscription.SubscriptionResource;
 import org.ligoj.bootstrap.core.NamedBean;
 import org.ligoj.bootstrap.core.validation.ValidationJsonException;
@@ -69,8 +69,7 @@ public class GithubPluginResourceTest extends AbstractServerTest {
 
 	@Before
 	public void mockGithubUrl() throws IOException {
-		ReflectionTestUtils.setField(resource, "githubApiUrl",
-				"http://localhost:" + MOCK_PORT + "/");
+		ReflectionTestUtils.setField(resource, "githubApiUrl", "http://localhost:" + MOCK_PORT + "/");
 	}
 
 	/**
@@ -132,20 +131,38 @@ public class GithubPluginResourceTest extends AbstractServerTest {
 		// Nothing to validate for now...
 	}
 
+	@SuppressWarnings("unchecked")
 	@Test
 	public void checkSubscriptionStatus() throws Exception {
 		prepareMockRepoDetail();
+		prepareMockContributors();
 		final SubscriptionStatusWithData nodeStatusWithData = resource
 				.checkSubscriptionStatus(subscriptionResource.getParametersNoCheck(subscription));
 		Assert.assertTrue(nodeStatusWithData.getStatus().isUp());
-		Assert.assertTrue(StringUtils.isNotEmpty((String) nodeStatusWithData.getData().get("info")));
+		Assert.assertEquals(3, nodeStatusWithData.getData().get("watchers"));
+		Assert.assertEquals(3, nodeStatusWithData.getData().get("stars"));
+		Assert.assertEquals(2, nodeStatusWithData.getData().get("issues"));
+		final List<GitHubContributor> contribs = (List<GitHubContributor>) nodeStatusWithData.getData().get("contribs");
+		Assert.assertEquals(3, contribs.size());
+		Assert.assertEquals("fabdouglas", contribs.get(0).getLogin());
+		Assert.assertEquals(345, contribs.get(0).getContributions());
 	}
 
 	private void prepareMockRepoDetail() throws IOException {
-		httpServer.stubFor(get(urlPathEqualTo("/repos/junit/gfi-gstack")).willReturn(aResponse().withStatus(HttpStatus.SC_OK)
-				.withBody(IOUtils.toString(
-						new ClassPathResource("mock-server/scm/github/repo-detail.json").getInputStream(),
-						StandardCharsets.UTF_8))));
+		httpServer.stubFor(
+				get(urlPathEqualTo("/repos/junit/gfi-gstack")).willReturn(aResponse().withStatus(HttpStatus.SC_OK)
+						.withBody(IOUtils.toString(
+								new ClassPathResource("mock-server/scm/github/repo-detail.json").getInputStream(),
+								StandardCharsets.UTF_8))));
+		httpServer.start();
+	}
+
+	private void prepareMockContributors() throws IOException {
+		httpServer.stubFor(
+				get(urlPathEqualTo("/repos/junit/gfi-gstack/contributors")).willReturn(aResponse().withStatus(HttpStatus.SC_OK)
+						.withBody(IOUtils.toString(
+								new ClassPathResource("mock-server/scm/github/contribs.json").getInputStream(),
+								StandardCharsets.UTF_8))));
 		httpServer.start();
 	}
 
