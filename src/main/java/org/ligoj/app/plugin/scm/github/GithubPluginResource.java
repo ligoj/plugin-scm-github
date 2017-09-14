@@ -1,7 +1,6 @@
 package org.ligoj.app.plugin.scm.github;
 
 import java.io.IOException;
-import java.text.Format;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -19,7 +18,6 @@ import org.ligoj.app.plugin.scm.ScmResource;
 import org.ligoj.app.plugin.scm.ScmServicePlugin;
 import org.ligoj.app.plugin.scm.github.client.GitHubContributor;
 import org.ligoj.app.plugin.scm.github.client.GitHubRepository;
-import org.ligoj.app.resource.NormalizeFormat;
 import org.ligoj.app.resource.plugin.AbstractToolPluginResource;
 import org.ligoj.app.resource.plugin.CurlProcessor;
 import org.ligoj.app.resource.plugin.CurlRequest;
@@ -67,7 +65,7 @@ public class GithubPluginResource extends AbstractToolPluginResource implements 
 	@Override
 	public boolean checkStatus(final Map<String, String> parameters) {
 		final CurlRequest request = new CurlRequest(HttpMethod.GET,
-				githubApiUrl + "users/" + parameters.get(PARAMETER_USER) + "/repos", null);
+				githubApiUrl + "users/" + parameters.get(PARAMETER_USER), null);
 		return processGitHubRequest(request, parameters);
 	}
 
@@ -140,22 +138,17 @@ public class GithubPluginResource extends AbstractToolPluginResource implements 
 	public List<NamedBean<String>> findReposByName(@PathParam("node") final String node,
 			@PathParam("criteria") final String criteria) throws IOException {
 		final Map<String, String> parameters = pvResource.getNodeParameters(node);
-		final CurlRequest request = new CurlRequest(HttpMethod.GET,
-				githubApiUrl + "users/" + parameters.get(PARAMETER_USER) + "/repos", null);
+		final CurlRequest request = new CurlRequest(HttpMethod.GET, githubApiUrl + "search/repositories?per_page=10&q="
+				+ criteria + "+user:" + parameters.get(PARAMETER_USER), null);
 		request.setSaveResponse(true);
-
 		if (processGitHubRequest(request, parameters)) {
-			// Prepare the context, an ordered set of projects
-			final Format format = new NormalizeFormat();
-			final String formatCriteria = format.format(criteria);
-
-			// Map, filter and limit the result
+			// Map the result
 			final ObjectMapper objectMapper = new ObjectMapper();
-			final List<GitHubRepository> result = objectMapper.<List<GitHubRepository>>readValue(request.getResponse(),
+			final List<GitHubRepository> result = objectMapper.convertValue(
+					objectMapper.readTree(request.getResponse()).get("items"),
 					new TypeReference<List<GitHubRepository>>() {
 					});
-			return result.stream().filter(repo -> format.format(repo.getName()).contains(formatCriteria))
-					.map(repo -> new NamedBean<>(repo.getName(), repo.getName())).limit(10)
+			return result.stream().map(repo -> new NamedBean<>(repo.getName(), repo.getName()))
 					.collect(Collectors.toList());
 		}
 		return new ArrayList<>();

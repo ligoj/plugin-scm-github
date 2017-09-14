@@ -1,6 +1,7 @@
 package org.ligoj.app.plugin.scm.github.client;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -22,4 +23,9 @@ public class GitHubContributor {
 	 * conribution count
 	 */
 	private int contributions;
+	/**
+	 * avatar url
+	 */
+	@JsonProperty("avatar_url")
+	private String avatarUrl;
 }

@@ -29,17 +29,18 @@ define(['sparkline'], function () {
 			}, 50);
 			return '<span></span>';
 		},
-		
+		/**
+		 * pie chart of contributions
+		 */
 		pieContributors: function(subscription) {
 			$('[data-subscription="' + subscription.id + '"]').find('.features>span').sparkline(
 					subscription.data.contribs.map(function(contrib) { return contrib.contributions; }), {
 						type: 'pie',
 						tooltipFormatter: function (sparkline, options, fields) {
-							return subscription.data.contribs[fields.offset].login + ': ' + fields.value + ' ' + current.$messages['service:scm:github:contributions'];
+							return '<img class="github-avatar" src="' + subscription.data.contribs[fields.offset].avatar_url +'"/>'+subscription.data.contribs[fields.offset].login + ': ' + fields.value + ' ' + current.$messages['service:scm:github:contributions'];
 						}
 					});
 		},
-
 		/**
 		 * Render github details : id, and amount of revisions.
 		 */

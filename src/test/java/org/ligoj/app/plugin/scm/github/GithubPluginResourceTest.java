@@ -115,7 +115,7 @@ public class GithubPluginResourceTest extends AbstractServerTest {
 		thrown.expect(ValidationJsonException.class);
 		thrown.expect(MatcherUtil.validationMatcher("service:scm:github:repository", "github-repository"));
 
-		prepareMockRepoList();
+		prepareMockUser();
 		httpServer.start();
 
 		parameterValueRepository.findAllBySubscription(subscription).stream()
@@ -146,6 +146,7 @@ public class GithubPluginResourceTest extends AbstractServerTest {
 		Assert.assertEquals(3, contribs.size());
 		Assert.assertEquals("fabdouglas", contribs.get(0).getLogin());
 		Assert.assertEquals(345, contribs.get(0).getContributions());
+		Assert.assertEquals("https://avatars1.githubusercontent.com/u/579170?v=4", contribs.get(0).getAvatarUrl());
 	}
 
 	private void prepareMockRepoDetail() throws IOException {
@@ -166,17 +167,25 @@ public class GithubPluginResourceTest extends AbstractServerTest {
 		httpServer.start();
 	}
 
-	private void prepareMockRepoList() throws IOException {
-		httpServer.stubFor(get(urlPathEqualTo("/users/junit/repos")).willReturn(aResponse().withStatus(HttpStatus.SC_OK)
+	private void prepareMockUser() throws IOException {
+		httpServer.stubFor(get(urlPathEqualTo("/users/junit")).willReturn(aResponse().withStatus(HttpStatus.SC_OK)
 				.withBody(IOUtils.toString(
-						new ClassPathResource("mock-server/scm/github/repo-list.json").getInputStream(),
+						new ClassPathResource("mock-server/scm/github/user.json").getInputStream(),
+						StandardCharsets.UTF_8))));
+		httpServer.start();
+	}
+
+	private void prepareMockRepoSearch() throws IOException {
+		httpServer.stubFor(get(urlPathEqualTo("/search/repositories")).willReturn(aResponse().withStatus(HttpStatus.SC_OK)
+				.withBody(IOUtils.toString(
+						new ClassPathResource("mock-server/scm/github/search.json").getInputStream(),
 						StandardCharsets.UTF_8))));
 		httpServer.start();
 	}
 
 	@Test
 	public void checkStatus() throws Exception {
-		prepareMockRepoList();
+		prepareMockUser();
 		Assert.assertTrue(resource.checkStatus(subscriptionResource.getParametersNoCheck(subscription)));
 	}
 
@@ -189,13 +198,13 @@ public class GithubPluginResourceTest extends AbstractServerTest {
 
 	@Test
 	public void findReposByName() throws Exception {
-		prepareMockRepoList();
+		prepareMockRepoSearch();
 		httpServer.start();
 
 		final List<NamedBean<String>> projects = resource.findReposByName("service:scm:github:dig", "plugin-");
 		Assert.assertEquals(10, projects.size());
-		Assert.assertEquals("plugin-bt", projects.get(0).getId());
-		Assert.assertEquals("plugin-bt", projects.get(0).getName());
+		Assert.assertEquals("plugin-storage-owncloud", projects.get(0).getId());
+		Assert.assertEquals("plugin-storage-owncloud", projects.get(0).getName());
 	}
 
 	@Test
