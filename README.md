@@ -15,4 +15,5 @@
 
 [Ligoj](https://github.com/ligoj/ligoj) Github plugin, and extending [SCM plugin](https://github.com/ligoj/plugin-scm)
 Provides the following features :
-- TODO 
+- Stars/issues/watcher
+- Contributors pie chart
