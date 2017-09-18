@@ -1,7 +1,7 @@
 package org.ligoj.app.plugin.scm.github;
 
 import java.io.IOException;
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -23,6 +23,8 @@ import org.ligoj.app.resource.plugin.CurlProcessor;
 import org.ligoj.app.resource.plugin.CurlRequest;
 import org.ligoj.bootstrap.core.NamedBean;
 import org.ligoj.bootstrap.core.validation.ValidationJsonException;
+import org.ligoj.bootstrap.resource.system.configuration.ConfigurationResource;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -53,9 +55,28 @@ public class GithubPluginResource extends AbstractToolPluginResource implements 
 	public static final String PARAMETER_AUTH_KEY = KEY + ":auth-key";
 
 	/**
-	 * github api url
+	 * Configuration key used for API URL
 	 */
-	private String githubApiUrl = "https://api.github.com/";
+	public static final String CONF_API_URL = KEY + ":api-url";
+
+	/**
+	 * Default API URL. May be changed to private repositories.
+	 */
+	public static final String DEFAULT_API_URL = "https://api.github.com/";
+
+	@Autowired
+	private ObjectMapper objectMapper;
+
+	@Autowired
+	private ConfigurationResource configuration;
+
+
+	/**
+	 * Return the API URL for this plug-in.
+	 */
+	protected String getApiUrl() {
+		return configuration.get(CONF_API_URL, DEFAULT_API_URL);
+	}
 
 	@Override
 	public String getKey() {
@@ -64,8 +85,7 @@ public class GithubPluginResource extends AbstractToolPluginResource implements 
 
 	@Override
 	public boolean checkStatus(final Map<String, String> parameters) {
-		final CurlRequest request = new CurlRequest(HttpMethod.GET,
-				githubApiUrl + "users/" + parameters.get(PARAMETER_USER), null);
+		final CurlRequest request = new CurlRequest(HttpMethod.GET, getApiUrl() + "users/" + parameters.get(PARAMETER_USER), null);
 		return processGitHubRequest(request, parameters);
 	}
 
@@ -73,7 +93,6 @@ public class GithubPluginResource extends AbstractToolPluginResource implements 
 	public SubscriptionStatusWithData checkSubscriptionStatus(final Map<String, String> parameters) throws IOException {
 		final SubscriptionStatusWithData nodeStatusWithData = new SubscriptionStatusWithData();
 		final String repo = validateRepository(parameters);
-		final ObjectMapper objectMapper = new ObjectMapper();
 		final GitHubRepository result = objectMapper.readValue(repo, GitHubRepository.class);
 		nodeStatusWithData.put("issues", result.getOpenIssues());
 		nodeStatusWithData.put("stars", result.getStargazersCount());
@@ -90,7 +109,7 @@ public class GithubPluginResource extends AbstractToolPluginResource implements 
 	 */
 	private String validateRepository(final Map<String, String> parameters) {
 		final CurlRequest request = new CurlRequest(HttpMethod.GET,
-				githubApiUrl + "repos/" + parameters.get(PARAMETER_USER) + "/" + parameters.get(PARAMETER_REPO), null);
+				getApiUrl() + "repos/" + parameters.get(PARAMETER_USER) + "/" + parameters.get(PARAMETER_REPO), null);
 		request.setSaveResponse(true);
 		if (!processGitHubRequest(request, parameters)) {
 			throw new ValidationJsonException(PARAMETER_REPO, "github-repository", parameters.get(PARAMETER_REPO));
@@ -105,15 +124,14 @@ public class GithubPluginResource extends AbstractToolPluginResource implements 
 	 *            subscription parameters
 	 * @throws IOException
 	 */
-	private List<GitHubContributor> getContributorsInformations(final Map<String, String> parameters)
-			throws IOException {
-		final CurlRequest request = new CurlRequest(HttpMethod.GET, githubApiUrl + "repos/"
-				+ parameters.get(PARAMETER_USER) + "/" + parameters.get(PARAMETER_REPO) + "/contributors", null);
+	private List<GitHubContributor> getContributorsInformations(final Map<String, String> parameters) throws IOException {
+		final CurlRequest request = new CurlRequest(HttpMethod.GET,
+				getApiUrl() + "repos/" + parameters.get(PARAMETER_USER) + "/" + parameters.get(PARAMETER_REPO) + "/contributors", null);
 		request.setSaveResponse(true);
 		processGitHubRequest(request, parameters);
-		return new ObjectMapper().<List<GitHubContributor>>readValue(request.getResponse(),
-				new TypeReference<List<GitHubContributor>>() {
-				});
+		return objectMapper.<List<GitHubContributor>>readValue(request.getResponse(), new TypeReference<List<GitHubContributor>>() {
+			// Nothing to extend
+		});
 	}
 
 	@Override
@@ -135,23 +153,21 @@ public class GithubPluginResource extends AbstractToolPluginResource implements 
 	 */
 	@GET
 	@Path("repos/{node}/{criteria}")
-	public List<NamedBean<String>> findReposByName(@PathParam("node") final String node,
-			@PathParam("criteria") final String criteria) throws IOException {
+	public List<NamedBean<String>> findReposByName(@PathParam("node") final String node, @PathParam("criteria") final String criteria)
+			throws IOException {
 		final Map<String, String> parameters = pvResource.getNodeParameters(node);
-		final CurlRequest request = new CurlRequest(HttpMethod.GET, githubApiUrl + "search/repositories?per_page=10&q="
-				+ criteria + "+user:" + parameters.get(PARAMETER_USER), null);
+		final CurlRequest request = new CurlRequest(HttpMethod.GET,
+				getApiUrl() + "search/repositories?per_page=10&q=" + criteria + "+user:" + parameters.get(PARAMETER_USER), null);
 		request.setSaveResponse(true);
 		if (processGitHubRequest(request, parameters)) {
 			// Map the result
-			final ObjectMapper objectMapper = new ObjectMapper();
-			final List<GitHubRepository> result = objectMapper.convertValue(
-					objectMapper.readTree(request.getResponse()).get("items"),
+			final List<GitHubRepository> result = objectMapper.convertValue(objectMapper.readTree(request.getResponse()).get("items"),
 					new TypeReference<List<GitHubRepository>>() {
+						// Nothing to extend
 					});
-			return result.stream().map(repo -> new NamedBean<>(repo.getName(), repo.getName()))
-					.collect(Collectors.toList());
+			return result.stream().map(repo -> new NamedBean<>(repo.getName(), repo.getName())).collect(Collectors.toList());
 		}
-		return new ArrayList<>();
+		return Collections.emptyList();
 	}
 
 	/**

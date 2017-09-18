@@ -29,12 +29,12 @@ import org.ligoj.app.plugin.scm.github.client.GitHubContributor;
 import org.ligoj.app.resource.subscription.SubscriptionResource;
 import org.ligoj.bootstrap.core.NamedBean;
 import org.ligoj.bootstrap.core.validation.ValidationJsonException;
+import org.ligoj.bootstrap.resource.system.configuration.ConfigurationResource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.test.annotation.Rollback;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.springframework.test.util.ReflectionTestUtils;
 
 /**
  * Test class of {@link GithubPluginResource}
@@ -52,24 +52,22 @@ public class GithubPluginResourceTest extends AbstractServerTest {
 
 	@Autowired
 	private ParameterValueRepository parameterValueRepository;
+	@Autowired
+	private ConfigurationResource configuration;
 
 	protected int subscription;
 
 	@Before
 	public void prepareData() throws IOException {
 		// Only with Spring context
-		persistEntities("csv",
-				new Class[] { Node.class, Parameter.class, Project.class, Subscription.class, ParameterValue.class },
+		persistEntities("csv", new Class[] { Node.class, Parameter.class, Project.class, Subscription.class, ParameterValue.class },
 				StandardCharsets.UTF_8.name());
 		this.subscription = getSubscription("gStack");
+		// Override the API URL pointing to the mock server
+		configuration.saveOrUpdate("service:scm:github:api-url", "http://localhost:" + MOCK_PORT + "/");
 
 		// Coverage only
 		resource.getKey();
-	}
-
-	@Before
-	public void mockGithubUrl() throws IOException {
-		ReflectionTestUtils.setField(resource, "githubApiUrl", "http://localhost:" + MOCK_PORT + "/");
 	}
 
 	/**
@@ -119,8 +117,7 @@ public class GithubPluginResourceTest extends AbstractServerTest {
 		httpServer.start();
 
 		parameterValueRepository.findAllBySubscription(subscription).stream()
-				.filter(v -> v.getParameter().getId().equals(GithubPluginResource.KEY + ":repository")).findFirst()
-				.get().setData("0");
+				.filter(v -> v.getParameter().getId().equals(GithubPluginResource.KEY + ":repository")).findFirst().get().setData("0");
 		em.flush();
 		em.clear();
 
@@ -150,36 +147,28 @@ public class GithubPluginResourceTest extends AbstractServerTest {
 	}
 
 	private void prepareMockRepoDetail() throws IOException {
-		httpServer.stubFor(
-				get(urlPathEqualTo("/repos/junit/gfi-gstack")).willReturn(aResponse().withStatus(HttpStatus.SC_OK)
-						.withBody(IOUtils.toString(
-								new ClassPathResource("mock-server/scm/github/repo-detail.json").getInputStream(),
-								StandardCharsets.UTF_8))));
+		httpServer.stubFor(get(urlPathEqualTo("/repos/junit/gfi-gstack"))
+				.willReturn(aResponse().withStatus(HttpStatus.SC_OK).withBody(IOUtils.toString(
+						new ClassPathResource("mock-server/scm/github/repo-detail.json").getInputStream(), StandardCharsets.UTF_8))));
 		httpServer.start();
 	}
 
 	private void prepareMockContributors() throws IOException {
-		httpServer.stubFor(
-				get(urlPathEqualTo("/repos/junit/gfi-gstack/contributors")).willReturn(aResponse().withStatus(HttpStatus.SC_OK)
-						.withBody(IOUtils.toString(
-								new ClassPathResource("mock-server/scm/github/contribs.json").getInputStream(),
-								StandardCharsets.UTF_8))));
+		httpServer.stubFor(get(urlPathEqualTo("/repos/junit/gfi-gstack/contributors"))
+				.willReturn(aResponse().withStatus(HttpStatus.SC_OK).withBody(IOUtils.toString(
+						new ClassPathResource("mock-server/scm/github/contribs.json").getInputStream(), StandardCharsets.UTF_8))));
 		httpServer.start();
 	}
 
 	private void prepareMockUser() throws IOException {
-		httpServer.stubFor(get(urlPathEqualTo("/users/junit")).willReturn(aResponse().withStatus(HttpStatus.SC_OK)
-				.withBody(IOUtils.toString(
-						new ClassPathResource("mock-server/scm/github/user.json").getInputStream(),
-						StandardCharsets.UTF_8))));
+		httpServer.stubFor(get(urlPathEqualTo("/users/junit")).willReturn(aResponse().withStatus(HttpStatus.SC_OK).withBody(
+				IOUtils.toString(new ClassPathResource("mock-server/scm/github/user.json").getInputStream(), StandardCharsets.UTF_8))));
 		httpServer.start();
 	}
 
 	private void prepareMockRepoSearch() throws IOException {
-		httpServer.stubFor(get(urlPathEqualTo("/search/repositories")).willReturn(aResponse().withStatus(HttpStatus.SC_OK)
-				.withBody(IOUtils.toString(
-						new ClassPathResource("mock-server/scm/github/search.json").getInputStream(),
-						StandardCharsets.UTF_8))));
+		httpServer.stubFor(get(urlPathEqualTo("/search/repositories")).willReturn(aResponse().withStatus(HttpStatus.SC_OK).withBody(
+				IOUtils.toString(new ClassPathResource("mock-server/scm/github/search.json").getInputStream(), StandardCharsets.UTF_8))));
 		httpServer.start();
 	}
 
