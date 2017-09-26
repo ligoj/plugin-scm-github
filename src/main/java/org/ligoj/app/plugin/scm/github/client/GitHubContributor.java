@@ -7,24 +7,24 @@ import lombok.Getter;
 import lombok.Setter;
 
 /**
- * GitHub contributor
- * 
- * @author alocquet
+ * GitHub contributor model.
  */
 @Getter
 @Setter
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class GitHubContributor {
 	/**
-	 * contributor login
+	 * Contributor login
 	 */
 	private String login;
+
 	/**
-	 * conribution count
+	 * Contribution count
 	 */
 	private int contributions;
+
 	/**
-	 * avatar url
+	 * Avatar URL
 	 */
 	@JsonProperty("avatar_url")
 	private String avatarUrl;

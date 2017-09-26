@@ -70,7 +70,6 @@ public class GithubPluginResource extends AbstractToolPluginResource implements 
 	@Autowired
 	private ConfigurationResource configuration;
 
-
 	/**
 	 * Return the API URL for this plug-in.
 	 */
@@ -118,7 +117,7 @@ public class GithubPluginResource extends AbstractToolPluginResource implements 
 	}
 
 	/**
-	 * validate a repository defined by input parameters.
+	 * Validate a repository defined by input parameters.
 	 * 
 	 * @param parameters
 	 *            subscription parameters
@@ -171,13 +170,13 @@ public class GithubPluginResource extends AbstractToolPluginResource implements 
 	}
 
 	/**
-	 * execute a curl request to GitHub with authentication.
+	 * Execute a CURL request to GitHub with authentication.
 	 * 
 	 * @param request
-	 *            curl request
+	 *            CURL request
 	 * @param parameters
-	 *            subscription parameters
-	 * @return true id request succeed
+	 *            Subscription parameters.
+	 * @return <code>true</code> when request succeed.
 	 */
 	private boolean processGitHubRequest(final CurlRequest request, final Map<String, String> parameters) {
 		request.getHeaders().put("Authorization", "token " + parameters.get(PARAMETER_AUTH_KEY));

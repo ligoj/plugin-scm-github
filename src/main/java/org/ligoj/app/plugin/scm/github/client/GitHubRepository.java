@@ -8,25 +8,28 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
 import lombok.Setter;
 
+/**
+ * Github statistics model.
+ */
 @Getter
 @Setter
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class GitHubRepository extends NamedBean<String> {
 
 	/**
-	 * repo open issues
+	 * Repository open issues
 	 */
 	@JsonProperty("open_issues")
 	private int openIssues;
 
 	/**
-	 * stars count
+	 * Stars count
 	 */
 	@JsonProperty("stargazers_count")
 	private int stargazersCount;
 
 	/**
-	 * watchers count
+	 * Watchers count
 	 */
 	private int watchers;
 
