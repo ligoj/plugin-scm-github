@@ -2,3 +2,9 @@
 	height: 32px;
 	width:32px;
 }
+.masonry-container .node.service-scm-github.mode-th-list table.subscriptions th.features {
+	width: 55px;
+}
+.masonry-container .node.service-scm-github table.subscriptions th.features {
+	width: 53px
+}
