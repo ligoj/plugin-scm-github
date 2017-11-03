@@ -8,7 +8,6 @@
 [![Coverage Status](https://coveralls.io/repos/github/ligoj/plugin-scm-github/badge.svg?branch=master)](https://coveralls.io/github/ligoj/plugin-scm-github?branch=master)
 [![Dependency Status](https://www.versioneye.com/user/projects/58caeda8dcaf9e0041b5b978/badge.svg?style=flat)](https://www.versioneye.com/user/projects/58caeda8dcaf9e0041b5b978)
 [![Quality Gate](https://sonarcloud.io/api/badges/gate?key=org.ligoj.plugin:plugin-scm-github)](https://sonarcloud.io/dashboard/index/org.ligoj.plugin:plugin-scm-github)
-[![Sourcegraph Badge](https://sourcegraph.com/github.com/ligoj/plugin-scm-github/-/badge.svg)](https://sourcegraph.com/github.com/ligoj/plugin-scm-github?badge)
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/ffc7e54dd80440cbb2ee4882edddda04)](https://www.codacy.com/app/ligoj/plugin-scm-github?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=ligoj/plugin-scm-github&amp;utm_campaign=Badge_Grade)
 [![CodeFactor](https://www.codefactor.io/repository/github/ligoj/plugin-scm-github/badge)](https://www.codefactor.io/repository/github/ligoj/plugin-scm-github)
 [![License](http://img.shields.io/:license-mit-blue.svg)](http://gus.mit-license.org/)
