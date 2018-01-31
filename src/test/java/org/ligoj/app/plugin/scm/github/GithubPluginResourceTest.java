@@ -12,10 +12,10 @@ import javax.transaction.Transactional;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpStatus;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.ligoj.app.AbstractServerTest;
 import org.ligoj.app.MatcherUtil;
 import org.ligoj.app.api.SubscriptionStatusWithData;
@@ -34,12 +34,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.test.annotation.Rollback;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 /**
  * Test class of {@link GithubPluginResource}
  */
-@RunWith(SpringJUnit4ClassRunner.class)
+@ExtendWith(SpringExtension.class)
 @ContextConfiguration(locations = "classpath:/META-INF/spring/application-context-test.xml")
 @Rollback
 @Transactional
@@ -57,7 +57,7 @@ public class GithubPluginResourceTest extends AbstractServerTest {
 
 	protected int subscription;
 
-	@Before
+	@BeforeEach
 	public void prepareData() throws IOException {
 		// Only with Spring context
 		persistEntities("csv", new Class[] { Node.class, Parameter.class, Project.class, Subscription.class, ParameterValue.class },
@@ -88,12 +88,12 @@ public class GithubPluginResourceTest extends AbstractServerTest {
 
 	@Test
 	public void getVersion() throws Exception {
-		Assert.assertNull(resource.getVersion(subscription));
+		Assertions.assertNull(resource.getVersion(subscription));
 	}
 
 	@Test
 	public void getLastVersion() throws Exception {
-		Assert.assertNull(resource.getLastVersion());
+		Assertions.assertNull(resource.getLastVersion());
 	}
 
 	@Test
@@ -110,9 +110,6 @@ public class GithubPluginResourceTest extends AbstractServerTest {
 
 	@Test
 	public void linkNotFound() throws Exception {
-		thrown.expect(ValidationJsonException.class);
-		thrown.expect(MatcherUtil.validationMatcher("service:scm:github:repository", "github-repository"));
-
 		prepareMockUser();
 		httpServer.start();
 
@@ -123,9 +120,9 @@ public class GithubPluginResourceTest extends AbstractServerTest {
 
 		// Invoke create for an already created entity, since for now, there is
 		// nothing but validation pour SonarQube
-		resource.link(this.subscription);
-
-		// Nothing to validate for now...
+		MatcherUtil.assertThrows(Assertions.assertThrows(ValidationJsonException.class, () -> {
+			resource.link(this.subscription);
+		}), "service:scm:github:repository", "github-repository");
 	}
 
 	@SuppressWarnings("unchecked")
@@ -135,15 +132,15 @@ public class GithubPluginResourceTest extends AbstractServerTest {
 		prepareMockContributors();
 		final SubscriptionStatusWithData nodeStatusWithData = resource
 				.checkSubscriptionStatus(subscriptionResource.getParametersNoCheck(subscription));
-		Assert.assertTrue(nodeStatusWithData.getStatus().isUp());
-		Assert.assertEquals(3, nodeStatusWithData.getData().get("watchers"));
-		Assert.assertEquals(3, nodeStatusWithData.getData().get("stars"));
-		Assert.assertEquals(2, nodeStatusWithData.getData().get("issues"));
+		Assertions.assertTrue(nodeStatusWithData.getStatus().isUp());
+		Assertions.assertEquals(3, nodeStatusWithData.getData().get("watchers"));
+		Assertions.assertEquals(3, nodeStatusWithData.getData().get("stars"));
+		Assertions.assertEquals(2, nodeStatusWithData.getData().get("issues"));
 		final List<GitHubContributor> contribs = (List<GitHubContributor>) nodeStatusWithData.getData().get("contribs");
-		Assert.assertEquals(3, contribs.size());
-		Assert.assertEquals("fabdouglas", contribs.get(0).getLogin());
-		Assert.assertEquals(345, contribs.get(0).getContributions());
-		Assert.assertEquals("https://avatars1.githubusercontent.com/u/579170?v=4", contribs.get(0).getAvatarUrl());
+		Assertions.assertEquals(3, contribs.size());
+		Assertions.assertEquals("fabdouglas", contribs.get(0).getLogin());
+		Assertions.assertEquals(345, contribs.get(0).getContributions());
+		Assertions.assertEquals("https://avatars1.githubusercontent.com/u/579170?v=4", contribs.get(0).getAvatarUrl());
 	}
 
 	private void prepareMockRepoDetail() throws IOException {
@@ -175,14 +172,14 @@ public class GithubPluginResourceTest extends AbstractServerTest {
 	@Test
 	public void checkStatus() throws Exception {
 		prepareMockUser();
-		Assert.assertTrue(resource.checkStatus(subscriptionResource.getParametersNoCheck(subscription)));
+		Assertions.assertTrue(resource.checkStatus(subscriptionResource.getParametersNoCheck(subscription)));
 	}
 
 	@Test
 	public void checkStatusBadRequest() throws Exception {
 		httpServer.stubFor(get(urlPathEqualTo("/")).willReturn(aResponse().withStatus(HttpStatus.SC_NOT_FOUND)));
 		httpServer.start();
-		Assert.assertFalse(resource.checkStatus(subscriptionResource.getParametersNoCheck(subscription)));
+		Assertions.assertFalse(resource.checkStatus(subscriptionResource.getParametersNoCheck(subscription)));
 	}
 
 	@Test
@@ -191,9 +188,9 @@ public class GithubPluginResourceTest extends AbstractServerTest {
 		httpServer.start();
 
 		final List<NamedBean<String>> projects = resource.findReposByName("service:scm:github:dig", "plugin-");
-		Assert.assertEquals(10, projects.size());
-		Assert.assertEquals("plugin-storage-owncloud", projects.get(0).getId());
-		Assert.assertEquals("plugin-storage-owncloud", projects.get(0).getName());
+		Assertions.assertEquals(10, projects.size());
+		Assertions.assertEquals("plugin-storage-owncloud", projects.get(0).getId());
+		Assertions.assertEquals("plugin-storage-owncloud", projects.get(0).getName());
 	}
 
 	@Test
@@ -201,7 +198,7 @@ public class GithubPluginResourceTest extends AbstractServerTest {
 		httpServer.start();
 
 		final List<NamedBean<String>> projects = resource.findReposByName("service:scm:github:dig", "as-");
-		Assert.assertEquals(0, projects.size());
+		Assertions.assertEquals(0, projects.size());
 	}
 
 }
