@@ -1,4 +1,4 @@
 id;name;refined.id;mode;uiClasses;tag;tagUiClasses
-service:scm;Source;;LINK;fa fa-code-fork;technical;fa fa-industry
+service:scm;Source;;LINK;fas fa-code-branch;technical;fa fa-industry
 service:scm:github;github;service:scm;LINK;;;
 service:scm:github:dig;github DIG;service:scm:github;LINK;;;
