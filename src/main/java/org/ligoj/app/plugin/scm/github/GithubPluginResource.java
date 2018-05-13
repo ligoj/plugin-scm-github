@@ -84,7 +84,8 @@ public class GithubPluginResource extends AbstractToolPluginResource implements 
 
 	@Override
 	public boolean checkStatus(final Map<String, String> parameters) {
-		final CurlRequest request = new CurlRequest(HttpMethod.GET, getApiUrl() + "users/" + parameters.get(PARAMETER_USER), null);
+		final CurlRequest request = new CurlRequest(HttpMethod.GET,
+				getApiUrl() + "users/" + parameters.get(PARAMETER_USER), null);
 		return processGitHubRequest(request, parameters);
 	}
 
@@ -102,7 +103,7 @@ public class GithubPluginResource extends AbstractToolPluginResource implements 
 
 	/**
 	 * validate a repository defined by input parameters.
-	 * 
+	 *
 	 * @param parameters
 	 *            subscription parameters
 	 */
@@ -118,19 +119,21 @@ public class GithubPluginResource extends AbstractToolPluginResource implements 
 
 	/**
 	 * Validate a repository defined by input parameters.
-	 * 
+	 *
 	 * @param parameters
 	 *            subscription parameters
 	 * @throws IOException
 	 */
-	private List<GitHubContributor> getContributorsInformations(final Map<String, String> parameters) throws IOException {
-		final CurlRequest request = new CurlRequest(HttpMethod.GET,
-				getApiUrl() + "repos/" + parameters.get(PARAMETER_USER) + "/" + parameters.get(PARAMETER_REPO) + "/contributors", null);
+	private List<GitHubContributor> getContributorsInformations(final Map<String, String> parameters)
+			throws IOException {
+		final CurlRequest request = new CurlRequest(HttpMethod.GET, getApiUrl() + "repos/"
+				+ parameters.get(PARAMETER_USER) + "/" + parameters.get(PARAMETER_REPO) + "/contributors", null);
 		request.setSaveResponse(true);
 		processGitHubRequest(request, parameters);
-		return objectMapper.<List<GitHubContributor>>readValue(request.getResponse(), new TypeReference<List<GitHubContributor>>() {
-			// Nothing to extend
-		});
+		return objectMapper.<List<GitHubContributor>>readValue(request.getResponse(),
+				new TypeReference<List<GitHubContributor>>() {
+					// Nothing to extend
+				});
 	}
 
 	@Override
@@ -140,10 +143,9 @@ public class GithubPluginResource extends AbstractToolPluginResource implements 
 
 	/**
 	 * Return user's repositories filtered by name.
-	 * 
+	 *
 	 * @param node
-	 *            the node used to retrieve parameters needed to find
-	 *            repositories
+	 *            the node used to retrieve parameters needed to find repositories
 	 * @param criteria
 	 *            search criteria
 	 * @return user's repositories
@@ -152,26 +154,28 @@ public class GithubPluginResource extends AbstractToolPluginResource implements 
 	 */
 	@GET
 	@Path("repos/{node}/{criteria}")
-	public List<NamedBean<String>> findReposByName(@PathParam("node") final String node, @PathParam("criteria") final String criteria)
-			throws IOException {
+	public List<NamedBean<String>> findReposByName(@PathParam("node") final String node,
+			@PathParam("criteria") final String criteria) throws IOException {
 		final Map<String, String> parameters = pvResource.getNodeParameters(node);
-		final CurlRequest request = new CurlRequest(HttpMethod.GET,
-				getApiUrl() + "search/repositories?per_page=10&q=" + criteria + "+user:" + parameters.get(PARAMETER_USER), null);
+		final CurlRequest request = new CurlRequest(HttpMethod.GET, getApiUrl() + "search/repositories?per_page=10&q="
+				+ criteria + "+user:" + parameters.get(PARAMETER_USER), null);
 		request.setSaveResponse(true);
 		if (processGitHubRequest(request, parameters)) {
 			// Map the result
-			final List<GitHubRepository> result = objectMapper.convertValue(objectMapper.readTree(request.getResponse()).get("items"),
+			final List<GitHubRepository> result = objectMapper.convertValue(
+					objectMapper.readTree(request.getResponse()).get("items"),
 					new TypeReference<List<GitHubRepository>>() {
 						// Nothing to extend
 					});
-			return result.stream().map(repo -> new NamedBean<>(repo.getName(), repo.getName())).collect(Collectors.toList());
+			return result.stream().map(repo -> new NamedBean<>(repo.getName(), repo.getName()))
+					.collect(Collectors.toList());
 		}
 		return Collections.emptyList();
 	}
 
 	/**
 	 * Execute a CURL request to GitHub with authentication.
-	 * 
+	 *
 	 * @param request
 	 *            CURL request
 	 * @param parameters
@@ -180,7 +184,9 @@ public class GithubPluginResource extends AbstractToolPluginResource implements 
 	 */
 	private boolean processGitHubRequest(final CurlRequest request, final Map<String, String> parameters) {
 		request.getHeaders().put("Authorization", "token " + parameters.get(PARAMETER_AUTH_KEY));
-		return new CurlProcessor().process(request);
+		try (CurlProcessor curl = new CurlProcessor()) {
+			return curl.process(request);
+		}
 	}
 
 }

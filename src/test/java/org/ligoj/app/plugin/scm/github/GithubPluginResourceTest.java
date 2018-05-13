@@ -65,7 +65,7 @@ public class GithubPluginResourceTest extends AbstractServerTest {
 				StandardCharsets.UTF_8.name());
 		this.subscription = getSubscription("gStack");
 		// Override the API URL pointing to the mock server
-		configuration.saveOrUpdate("service:scm:github:api-url", "http://localhost:" + MOCK_PORT + "/");
+		configuration.put("service:scm:github:api-url", "http://localhost:" + MOCK_PORT + "/");
 
 		// Coverage only
 		resource.getKey();
