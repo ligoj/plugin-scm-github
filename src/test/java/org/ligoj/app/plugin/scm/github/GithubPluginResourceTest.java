@@ -146,7 +146,7 @@ public class GithubPluginResourceTest extends AbstractServerTest {
 
 	private void prepareMockRepoDetail() throws IOException {
 		httpServer.stubFor(
-				get(urlPathEqualTo("/repos/junit/gfi-gstack")).willReturn(aResponse().withStatus(HttpStatus.SC_OK)
+				get(urlPathEqualTo("/repos/junit/ligoj-gstack")).willReturn(aResponse().withStatus(HttpStatus.SC_OK)
 						.withBody(IOUtils.toString(
 								new ClassPathResource("mock-server/scm/github/repo-detail.json").getInputStream(),
 								StandardCharsets.UTF_8))));
@@ -154,7 +154,7 @@ public class GithubPluginResourceTest extends AbstractServerTest {
 	}
 
 	private void prepareMockContributors() throws IOException {
-		httpServer.stubFor(get(urlPathEqualTo("/repos/junit/gfi-gstack/contributors"))
+		httpServer.stubFor(get(urlPathEqualTo("/repos/junit/ligoj-gstack/contributors"))
 				.willReturn(aResponse().withStatus(HttpStatus.SC_OK)
 						.withBody(IOUtils.toString(
 								new ClassPathResource("mock-server/scm/github/contribs.json").getInputStream(),
