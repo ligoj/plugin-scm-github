@@ -17,6 +17,11 @@ import lombok.Setter;
 public class GitHubRepository extends NamedBean<String> {
 
 	/**
+	 * SID
+	 */
+	private static final long serialVersionUID = 1L;
+
+	/**
 	 * Repository open issues
 	 */
 	@JsonProperty("open_issues")
