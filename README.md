@@ -3,7 +3,7 @@
 [![Build Status](https://travis-ci.org/ligoj/plugin-scm-github.svg?branch=master)](https://travis-ci.org/ligoj/plugin-scm-github)
 [![Build Status](https://circleci.com/gh/ligoj/plugin-scm-github.svg?style=svg)](https://circleci.com/gh/ligoj/plugin-scm-github)
 [![Build Status](https://semaphoreci.com/api/v1/ligoj/plugin-scm-github/branches/master/shields_badge.svg)](https://semaphoreci.com/ligoj/plugin-scm-github)
-[![Build Status](https://ci.appveyor.com/api/projects/status/5a0lx6jsqp6ku15m/branch/master?svg=true)](https://ci.appveyor.com/project/ligoj/plugin-scm-github/branch/master)
+[![Build Status](https://ci.appveyor.com/api/projects/status/1g6u1wtsv2osml2l/branch/master?svg=true)](https://ci.appveyor.com/project/ligoj/plugin-scm-github/branch/master)
 [![Coverage](https://sonarcloud.io/api/project_badges/measure?project=org.ligoj.plugin%3Aplugin-scm-github&metric=coverage)](https://sonarcloud.io/dashboard?id=org.ligoj.plugin%3Aplugin-scm-github)
 [![Quality Gate](https://sonarcloud.io/api/project_badges/measure?metric=alert_status&project=org.ligoj.plugin:plugin-scm-github)](https://sonarcloud.io/dashboard/index/org.ligoj.plugin:plugin-scm-github)
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/ffc7e54dd80440cbb2ee4882edddda04)](https://www.codacy.com/app/ligoj/plugin-scm-github?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=ligoj/plugin-scm-github&amp;utm_campaign=Badge_Grade)
