@@ -43,7 +43,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 @ContextConfiguration(locations = "classpath:/META-INF/spring/application-context-test.xml")
 @Rollback
 @Transactional
-public class GithubPluginResourceTest extends AbstractServerTest {
+class GithubPluginResourceTest extends AbstractServerTest {
 	@Autowired
 	private GithubPluginResource resource;
 
@@ -58,7 +58,7 @@ public class GithubPluginResourceTest extends AbstractServerTest {
 	protected int subscription;
 
 	@BeforeEach
-	public void prepareData() throws IOException {
+	void prepareData() throws IOException {
 		// Only with Spring context
 		persistEntities("csv",
 				new Class[] { Node.class, Parameter.class, Project.class, Subscription.class, ParameterValue.class },
@@ -74,12 +74,12 @@ public class GithubPluginResourceTest extends AbstractServerTest {
 	/**
 	 * Return the subscription identifier of the given project. Assumes there is only one subscription for a service.
 	 */
-	protected Integer getSubscription(final String project) {
+	private Integer getSubscription(final String project) {
 		return getSubscription(project, GithubPluginResource.KEY);
 	}
 
 	@Test
-	public void delete() throws Exception {
+	void delete() throws Exception {
 		resource.delete(subscription, false);
 		em.flush();
 		em.clear();
@@ -87,17 +87,17 @@ public class GithubPluginResourceTest extends AbstractServerTest {
 	}
 
 	@Test
-	public void getVersion() throws Exception {
+	void getVersion() throws Exception {
 		Assertions.assertNull(resource.getVersion(subscription));
 	}
 
 	@Test
-	public void getLastVersion() throws Exception {
+	void getLastVersion() throws Exception {
 		Assertions.assertNull(resource.getLastVersion());
 	}
 
 	@Test
-	public void link() throws Exception {
+	void link() throws Exception {
 		prepareMockRepoDetail();
 		httpServer.start();
 
@@ -109,7 +109,7 @@ public class GithubPluginResourceTest extends AbstractServerTest {
 	}
 
 	@Test
-	public void linkNotFound() throws Exception {
+	void linkNotFound() throws Exception {
 		prepareMockUser();
 		httpServer.start();
 
@@ -128,7 +128,7 @@ public class GithubPluginResourceTest extends AbstractServerTest {
 
 	@SuppressWarnings("unchecked")
 	@Test
-	public void checkSubscriptionStatus() throws IOException {
+	void checkSubscriptionStatus() throws IOException {
 		prepareMockRepoDetail();
 		prepareMockContributors();
 		final SubscriptionStatusWithData nodeStatusWithData = resource
@@ -179,20 +179,20 @@ public class GithubPluginResourceTest extends AbstractServerTest {
 	}
 
 	@Test
-	public void checkStatus() throws Exception {
+	void checkStatus() throws Exception {
 		prepareMockUser();
 		Assertions.assertTrue(resource.checkStatus(subscriptionResource.getParametersNoCheck(subscription)));
 	}
 
 	@Test
-	public void checkStatusBadRequest() {
+	void checkStatusBadRequest() {
 		httpServer.stubFor(get(urlPathEqualTo("/")).willReturn(aResponse().withStatus(HttpStatus.SC_NOT_FOUND)));
 		httpServer.start();
 		Assertions.assertFalse(resource.checkStatus(subscriptionResource.getParametersNoCheck(subscription)));
 	}
 
 	@Test
-	public void findReposByName() throws IOException {
+	void findReposByName() throws IOException {
 		prepareMockRepoSearch();
 		httpServer.start();
 
@@ -203,7 +203,7 @@ public class GithubPluginResourceTest extends AbstractServerTest {
 	}
 
 	@Test
-	public void findReposByNameNoListing() throws IOException {
+	void findReposByNameNoListing() throws IOException {
 		httpServer.start();
 
 		final List<NamedBean<String>> projects = resource.findReposByName("service:scm:github:dig", "as-");

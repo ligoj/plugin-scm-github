@@ -50,9 +50,9 @@ public class GithubPluginResource extends AbstractToolPluginResource implements 
 	/**
 	 * parameters
 	 */
-	public static final String PARAMETER_USER = KEY + ":user";
-	public static final String PARAMETER_REPO = KEY + ":repository";
-	public static final String PARAMETER_AUTH_KEY = KEY + ":auth-key";
+	private static final String PARAMETER_USER = KEY + ":user";
+	private static final String PARAMETER_REPO = KEY + ":repository";
+	private static final String PARAMETER_AUTH_KEY = KEY + ":auth-key";
 
 	/**
 	 * Configuration key used for API URL
@@ -73,7 +73,7 @@ public class GithubPluginResource extends AbstractToolPluginResource implements 
 	/**
 	 * Return the API URL for this plug-in.
 	 */
-	protected String getApiUrl() {
+	private String getApiUrl() {
 		return configuration.get(CONF_API_URL, DEFAULT_API_URL);
 	}
 
