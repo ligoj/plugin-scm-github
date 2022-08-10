@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.HttpMethod;
@@ -104,8 +103,7 @@ public class GithubPluginResource extends AbstractToolPluginResource implements 
 	/**
 	 * validate a repository defined by input parameters.
 	 *
-	 * @param parameters
-	 *            subscription parameters
+	 * @param parameters subscription parameters
 	 */
 	private String validateRepository(final Map<String, String> parameters) {
 		final CurlRequest request = new CurlRequest(HttpMethod.GET,
@@ -120,8 +118,7 @@ public class GithubPluginResource extends AbstractToolPluginResource implements 
 	/**
 	 * Validate a repository defined by input parameters.
 	 *
-	 * @param parameters
-	 *            subscription parameters
+	 * @param parameters subscription parameters
 	 * @throws IOException
 	 */
 	private List<GitHubContributor> getContributorsInformations(final Map<String, String> parameters)
@@ -144,13 +141,10 @@ public class GithubPluginResource extends AbstractToolPluginResource implements 
 	/**
 	 * Return user's repositories filtered by name.
 	 *
-	 * @param node
-	 *            the node used to retrieve parameters needed to find repositories
-	 * @param criteria
-	 *            search criteria
+	 * @param node     the node used to retrieve parameters needed to find repositories
+	 * @param criteria search criteria
 	 * @return user's repositories
-	 * @throws IOException
-	 *             unexpected exception
+	 * @throws IOException unexpected exception
 	 */
 	@GET
 	@Path("repos/{node}/{criteria}")
@@ -167,8 +161,7 @@ public class GithubPluginResource extends AbstractToolPluginResource implements 
 					new TypeReference<List<GitHubRepository>>() {
 						// Nothing to extend
 					});
-			return result.stream().map(repo -> new NamedBean<>(repo.getName(), repo.getName()))
-					.collect(Collectors.toList());
+			return result.stream().map(repo -> new NamedBean<>(repo.getName(), repo.getName())).toList();
 		}
 		return Collections.emptyList();
 	}
@@ -176,10 +169,8 @@ public class GithubPluginResource extends AbstractToolPluginResource implements 
 	/**
 	 * Execute a CURL request to GitHub with authentication.
 	 *
-	 * @param request
-	 *            CURL request
-	 * @param parameters
-	 *            Subscription parameters.
+	 * @param request    CURL request
+	 * @param parameters Subscription parameters.
 	 * @return <code>true</code> when request succeed.
 	 */
 	private boolean processGitHubRequest(final CurlRequest request, final Map<String, String> parameters) {
