@@ -63,12 +63,12 @@ class GithubPluginResourceTest extends AbstractServerTest {
 		persistEntities("csv",
 				new Class[] { Node.class, Parameter.class, Project.class, Subscription.class, ParameterValue.class },
 				StandardCharsets.UTF_8.name());
-		this.subscription = getSubscription("gStack");
+		this.subscription = getSubscription("Jupiter");
 		// Override the API URL pointing to the mock server
 		configuration.put("service:scm:github:api-url", "http://localhost:" + MOCK_PORT + "/");
 
 		// Coverage only
-		resource.getKey();
+		Assertions.assertEquals("service:scm:github",resource.getKey());
 	}
 
 	/**
@@ -121,9 +121,7 @@ class GithubPluginResourceTest extends AbstractServerTest {
 
 		// Invoke create for an already created entity, since for now, there is
 		// nothing but validation pour SonarQube
-		MatcherUtil.assertThrows(Assertions.assertThrows(ValidationJsonException.class, () -> {
-			resource.link(this.subscription);
-		}), "service:scm:github:repository", "github-repository");
+		MatcherUtil.assertThrows(Assertions.assertThrows(ValidationJsonException.class, () -> resource.link(this.subscription)), "service:scm:github:repository", "github-repository");
 	}
 
 	@SuppressWarnings("unchecked")
@@ -137,16 +135,16 @@ class GithubPluginResourceTest extends AbstractServerTest {
 		Assertions.assertEquals(3, nodeStatusWithData.getData().get("watchers"));
 		Assertions.assertEquals(3, nodeStatusWithData.getData().get("stars"));
 		Assertions.assertEquals(2, nodeStatusWithData.getData().get("issues"));
-		final List<GitHubContributor> contribs = (List<GitHubContributor>) nodeStatusWithData.getData().get("contribs");
-		Assertions.assertEquals(3, contribs.size());
-		Assertions.assertEquals("fabdouglas", contribs.get(0).getLogin());
-		Assertions.assertEquals(345, contribs.get(0).getContributions());
-		Assertions.assertEquals("https://avatars1.githubusercontent.com/u/579170?v=4", contribs.get(0).getAvatarUrl());
+		final var contributions = (List<GitHubContributor>) nodeStatusWithData.getData().get("contribs");
+		Assertions.assertEquals(3, contributions.size());
+		Assertions.assertEquals("fabdouglas", contributions.get(0).getLogin());
+		Assertions.assertEquals(345, contributions.get(0).getContributions());
+		Assertions.assertEquals("https://avatars1.githubusercontent.com/u/579170?v=4", contributions.get(0).getAvatarUrl());
 	}
 
 	private void prepareMockRepoDetail() throws IOException {
 		httpServer.stubFor(
-				get(urlPathEqualTo("/repos/junit/ligoj-gstack")).willReturn(aResponse().withStatus(HttpStatus.SC_OK)
+				get(urlPathEqualTo("/repos/junit/ligoj-jupiter")).willReturn(aResponse().withStatus(HttpStatus.SC_OK)
 						.withBody(IOUtils.toString(
 								new ClassPathResource("mock-server/scm/github/repo-detail.json").getInputStream(),
 								StandardCharsets.UTF_8))));
@@ -154,7 +152,7 @@ class GithubPluginResourceTest extends AbstractServerTest {
 	}
 
 	private void prepareMockContributors() throws IOException {
-		httpServer.stubFor(get(urlPathEqualTo("/repos/junit/ligoj-gstack/contributors"))
+		httpServer.stubFor(get(urlPathEqualTo("/repos/junit/ligoj-jupiter/contributors"))
 				.willReturn(aResponse().withStatus(HttpStatus.SC_OK)
 						.withBody(IOUtils.toString(
 								new ClassPathResource("mock-server/scm/github/contribs.json").getInputStream(),
