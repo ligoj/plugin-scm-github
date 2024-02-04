@@ -137,9 +137,9 @@ class GithubPluginResourceTest extends AbstractServerTest {
 		Assertions.assertEquals(2, nodeStatusWithData.getData().get("issues"));
 		final var contributions = (List<GitHubContributor>) nodeStatusWithData.getData().get("contribs");
 		Assertions.assertEquals(3, contributions.size());
-		Assertions.assertEquals("fabdouglas", contributions.get(0).getLogin());
-		Assertions.assertEquals(345, contributions.get(0).getContributions());
-		Assertions.assertEquals("https://avatars1.githubusercontent.com/u/579170?v=4", contributions.get(0).getAvatarUrl());
+		Assertions.assertEquals("fabdouglas", contributions.getFirst().getLogin());
+		Assertions.assertEquals(345, contributions.getFirst().getContributions());
+		Assertions.assertEquals("https://avatars1.githubusercontent.com/u/579170?v=4", contributions.getFirst().getAvatarUrl());
 	}
 
 	private void prepareMockRepoDetail() throws IOException {
@@ -196,8 +196,8 @@ class GithubPluginResourceTest extends AbstractServerTest {
 
 		final List<NamedBean<String>> projects = resource.findReposByName("service:scm:github:dig", "plugin-");
 		Assertions.assertEquals(10, projects.size());
-		Assertions.assertEquals("plugin-storage-owncloud", projects.get(0).getId());
-		Assertions.assertEquals("plugin-storage-owncloud", projects.get(0).getName());
+		Assertions.assertEquals("plugin-storage-owncloud", projects.getFirst().getId());
+		Assertions.assertEquals("plugin-storage-owncloud", projects.getFirst().getName());
 	}
 
 	@Test
