@@ -30,7 +30,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
- * Github resource.
+ * GitHub resource.
  */
 @Path(GithubPluginResource.URL)
 @Component
@@ -96,7 +96,7 @@ public class GithubPluginResource extends AbstractToolPluginResource implements 
 		nodeStatusWithData.put("issues", result.getOpenIssues());
 		nodeStatusWithData.put("stars", result.getStargazersCount());
 		nodeStatusWithData.put("watchers", result.getWatchers());
-		nodeStatusWithData.put("contribs", getContributorsInformations(parameters));
+		nodeStatusWithData.put("contribs", getContributorsInformation(parameters));
 		return nodeStatusWithData;
 	}
 
@@ -119,15 +119,15 @@ public class GithubPluginResource extends AbstractToolPluginResource implements 
 	 * Validate a repository defined by input parameters.
 	 *
 	 * @param parameters subscription parameters
-	 * @throws IOException
+	 * @throws IOException When data cannot be read from GitHub.
 	 */
-	private List<GitHubContributor> getContributorsInformations(final Map<String, String> parameters)
+	private List<GitHubContributor> getContributorsInformation(final Map<String, String> parameters)
 			throws IOException {
 		final CurlRequest request = new CurlRequest(HttpMethod.GET, getApiUrl() + "repos/"
 				+ parameters.get(PARAMETER_USER) + "/" + parameters.get(PARAMETER_REPO) + "/contributors", null);
 		request.setSaveResponse(true);
 		processGitHubRequest(request, parameters);
-		return objectMapper.<List<GitHubContributor>>readValue(request.getResponse(),
+		return objectMapper.readValue(request.getResponse(),
 				new TypeReference<List<GitHubContributor>>() {
 					// Nothing to extend
 				});

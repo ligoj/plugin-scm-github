@@ -10,7 +10,7 @@ define({
 		'service:scm:github:contributions': 'Contributions',
 		'error': {
 			'github-admin': 'Administrator access failed',
-			'github-repository': 'Invalid Github repository'
+			'github-repository': 'Invalid GitHub repository'
 		}
 	},
 	fr: true

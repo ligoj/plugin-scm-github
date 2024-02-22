@@ -9,7 +9,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 /**
- * Github statistics model.
+ * GitHub statistics model.
  */
 @Getter
 @Setter

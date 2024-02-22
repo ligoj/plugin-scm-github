@@ -12,7 +12,7 @@
 	<artifactId>plugin-scm-github</artifactId>
 	<version>1.1.1-SNAPSHOT</version>
 	<packaging>jar</packaging>
-	<name>Ligoj - Plugin SCM - Github</name>
+	<name>Ligoj - Plugin SCM - GitHub</name>
 
 	<scm>
 		<connection>scm:git:https://github.com/ligoj/plugin-scm-github</connection>
