@@ -48,7 +48,7 @@ define(['sparkline'], function () {
 			var repo = 'https://github.com/' + subscription.parameters['service:scm:github:user'] + '/' + subscription.parameters['service:scm:github:repository']
 			return current.$super('generateCarousel')(subscription, [
 				current.renderKey(subscription),
-				'     <a href="' + repo + '/issues" target="_blank" data-toggle="tooltip" title="' +  current.$messages['service:scm:github:openissues']  + '"><li class="fas fa-exclamation-circle "/> ' + subscription.data.issues +
+				'     <a href="' + repo + '/issues" target="_blank" data-toggle="tooltip" title="' +  current.$messages['service:scm:github:open-issues']  + '"><li class="fas fa-exclamation-circle "/> ' + subscription.data.issues +
 				'</a> <a href="' + repo + '" target="_blank"        data-toggle="tooltip" title="' +  current.$messages['service:scm:github:stars']  + '"     ><li class="fas fa-star"/> ' + subscription.data.stars +
 				'</a> <a href="' + repo + '" target="_blank"        data-toggle="tooltip" title="' +  current.$messages['service:scm:github:watchers']  + '"  ><li class="fas fa-eye"/> ' + subscription.data.watchers+'</a>'
 				], 1);
