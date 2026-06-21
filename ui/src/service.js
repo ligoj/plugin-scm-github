@@ -16,8 +16,7 @@
  *
  * Kept free of Vue SFC imports so it can be unit-tested without a DOM.
  */
-import { h } from 'vue'
-import { VBtn, VChip, VIcon, useI18nStore } from '@ligoj/host'
+import { renderServiceLink, renderDetailsChip, useI18nStore } from '@ligoj/host'
 
 const PARAM_USER = 'service:scm:github:user'
 const PARAM_REPO = 'service:scm:github:repository'
@@ -29,21 +28,7 @@ function renderFeatures(subscription) {
   const repo = params?.[PARAM_REPO]
   if (!user || !repo) return []
   const { t } = useI18nStore()
-  return [
-    h(
-      VBtn,
-      {
-        icon: true,
-        size: 'small',
-        variant: 'text',
-        title: t('service:scm:github:repository'),
-        href: `https://github.com/${encodeURIComponent(user)}/${encodeURIComponent(repo)}`,
-        target: '_blank',
-        rel: 'noopener noreferrer',
-      },
-      () => h(VIcon, { size: 'small' }, () => 'mdi-github'),
-    ),
-  ]
+  return [renderServiceLink({ icon: 'mdi-github', href: `https://github.com/${encodeURIComponent(user)}/${encodeURIComponent(repo)}`, title: t('service:scm:github:repository') })]
 }
 
 /** Repository chip. Mirrors the legacy renderKey('service:scm:github:repository'). */
@@ -51,11 +36,7 @@ function renderDetailsKey(subscription) {
   const repo = subscription?.parameters?.[PARAM_REPO]
   if (!repo) return null
   const { t } = useI18nStore()
-  return h(
-    VChip,
-    { size: 'small', variant: 'tonal', class: 'mr-1', title: t('service:scm:github:repository') },
-    () => [h(VIcon, { start: true, size: 'small' }, () => 'mdi-github'), ' ', String(repo)],
-  )
+  return renderDetailsChip({ icon: 'mdi-github', text: repo, title: t('service:scm:github:repository') })
 }
 
 export default { renderFeatures, renderDetailsKey }
