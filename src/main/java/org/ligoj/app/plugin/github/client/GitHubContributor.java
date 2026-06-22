@@ -1,4 +1,4 @@
-package org.ligoj.app.plugin.scm.github.client;
+package org.ligoj.app.plugin.github.client;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;

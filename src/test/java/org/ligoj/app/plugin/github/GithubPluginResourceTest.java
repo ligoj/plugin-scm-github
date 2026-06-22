@@ -1,4 +1,4 @@
-package org.ligoj.app.plugin.scm.github;
+package org.ligoj.app.plugin.github;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.get;
@@ -24,7 +24,8 @@ import org.ligoj.app.model.Parameter;
 import org.ligoj.app.model.ParameterValue;
 import org.ligoj.app.model.Project;
 import org.ligoj.app.model.Subscription;
-import org.ligoj.app.plugin.scm.github.client.GitHubContributor;
+import org.ligoj.app.plugin.github.GithubPluginResource;
+import org.ligoj.app.plugin.github.client.GitHubContributor;
 import org.ligoj.app.resource.subscription.SubscriptionResource;
 import org.ligoj.bootstrap.MatcherUtil;
 import org.ligoj.bootstrap.core.NamedBean;

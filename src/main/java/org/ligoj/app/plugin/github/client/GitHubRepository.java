@@ -1,4 +1,4 @@
-package org.ligoj.app.plugin.scm.github.client;
+package org.ligoj.app.plugin.github.client;
 
 import org.ligoj.bootstrap.core.NamedBean;
 

@@ -1,4 +1,4 @@
-package org.ligoj.app.plugin.scm.github;
+package org.ligoj.app.plugin.github;
 
 import java.io.IOException;
 import java.util.Collections;
@@ -15,8 +15,8 @@ import jakarta.ws.rs.core.MediaType;
 import org.ligoj.app.api.SubscriptionStatusWithData;
 import org.ligoj.app.plugin.scm.ScmResource;
 import org.ligoj.app.plugin.scm.ScmServicePlugin;
-import org.ligoj.app.plugin.scm.github.client.GitHubContributor;
-import org.ligoj.app.plugin.scm.github.client.GitHubRepository;
+import org.ligoj.app.plugin.github.client.GitHubContributor;
+import org.ligoj.app.plugin.github.client.GitHubRepository;
 import org.ligoj.app.resource.plugin.AbstractToolPluginResource;
 import org.ligoj.bootstrap.core.NamedBean;
 import org.ligoj.bootstrap.core.curl.CurlProcessor;
