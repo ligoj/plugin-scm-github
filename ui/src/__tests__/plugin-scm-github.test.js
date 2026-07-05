@@ -11,6 +11,13 @@ import parentDef from '../../../../plugin-scm/ui/src/index.js'
 
 beforeEach(() => { setActivePinia(createPinia()) })
 
+/** Extract the mdi icon name from a renderServiceLink (VBtn) vnode. */
+function iconOf(vnode) {
+  const kids = vnode.children.default()
+  const iconVNode = Array.isArray(kids) ? kids[0] : kids
+  return iconVNode.children.default()
+}
+
 describe('plugin-scm-github manifest', () => {
   it('exposes a valid tool-level manifest', () => {
     expect(def.id).toBe('scm-github')
@@ -39,6 +46,8 @@ describe('plugin-scm-github manifest', () => {
     expect(vnodes).toHaveLength(1)
     expect(vnodes[0].__v_isVNode).toBe(true)
     expect(vnodes[0].props.target).toBe('_blank')
+    expect(vnodes[0].props.href).toBe('https://github.com/acme/app')
+    expect(iconOf(vnodes[0])).toBe('mdi-home')
   })
 
   it('renderFeatures returns [] without the required params', () => {

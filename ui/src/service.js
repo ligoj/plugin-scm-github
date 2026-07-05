@@ -28,7 +28,7 @@ function renderFeatures(subscription) {
   const repo = params?.[PARAM_REPO]
   if (!user || !repo) return []
   const { t } = useI18nStore()
-  return [renderServiceLink({ icon: 'mdi-github', href: `https://github.com/${encodeURIComponent(user)}/${encodeURIComponent(repo)}`, title: t('service:scm:github:repository') })]
+  return [renderServiceLink({ icon: 'mdi-home', href: `https://github.com/${encodeURIComponent(user)}/${encodeURIComponent(repo)}`, title: t('service:scm:github:repository') })]
 }
 
 /** Repository chip. Mirrors the legacy renderKey('service:scm:github:repository'). */
