@@ -1,22 +1,12 @@
 package org.ligoj.app.plugin.github;
 
-import java.io.IOException;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-
-import jakarta.ws.rs.GET;
-import jakarta.ws.rs.HttpMethod;
-import jakarta.ws.rs.Path;
-import jakarta.ws.rs.PathParam;
-import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
-
 import org.ligoj.app.api.SubscriptionStatusWithData;
-import org.ligoj.app.plugin.scm.ScmResource;
-import org.ligoj.app.plugin.scm.ScmServicePlugin;
 import org.ligoj.app.plugin.github.client.GitHubContributor;
 import org.ligoj.app.plugin.github.client.GitHubRepository;
+import org.ligoj.app.plugin.scm.ScmResource;
+import org.ligoj.app.plugin.scm.ScmServicePlugin;
 import org.ligoj.app.resource.plugin.AbstractToolPluginResource;
 import org.ligoj.bootstrap.core.NamedBean;
 import org.ligoj.bootstrap.core.curl.CurlProcessor;
@@ -25,9 +15,13 @@ import org.ligoj.bootstrap.core.validation.ValidationJsonException;
 import org.ligoj.bootstrap.resource.system.configuration.ConfigurationResource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.ObjectMapper;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+
 
 /**
  * GitHub resource.
@@ -89,7 +83,7 @@ public class GithubPluginResource extends AbstractToolPluginResource implements 
 	}
 
 	@Override
-	public SubscriptionStatusWithData checkSubscriptionStatus(final Map<String, String> parameters) throws IOException {
+	public SubscriptionStatusWithData checkSubscriptionStatus(final Map<String, String> parameters) {
 		final SubscriptionStatusWithData nodeStatusWithData = new SubscriptionStatusWithData();
 		final String repo = validateRepository(parameters);
 		final GitHubRepository result = objectMapper.readValue(repo, GitHubRepository.class);
@@ -119,16 +113,14 @@ public class GithubPluginResource extends AbstractToolPluginResource implements 
 	 * Validate a repository defined by input parameters.
 	 *
 	 * @param parameters subscription parameters
-	 * @throws IOException When data cannot be read from GitHub.
 	 */
-	private List<GitHubContributor> getContributorsInformation(final Map<String, String> parameters)
-			throws IOException {
+	private List<GitHubContributor> getContributorsInformation(final Map<String, String> parameters) {
 		final CurlRequest request = new CurlRequest(HttpMethod.GET, getApiUrl() + "repos/"
 				+ parameters.get(PARAMETER_USER) + "/" + parameters.get(PARAMETER_REPO) + "/contributors", null);
 		request.setSaveResponse(true);
 		processGitHubRequest(request, parameters);
 		return objectMapper.readValue(request.getResponse(),
-				new TypeReference<List<GitHubContributor>>() {
+				new TypeReference<>() {
 					// Nothing to extend
 				});
 	}
@@ -144,12 +136,11 @@ public class GithubPluginResource extends AbstractToolPluginResource implements 
 	 * @param node     the node used to retrieve parameters needed to find repositories
 	 * @param criteria search criteria
 	 * @return user's repositories
-	 * @throws IOException unexpected exception
 	 */
 	@GET
 	@Path("repos/{node}/{criteria}")
 	public List<NamedBean<String>> findReposByName(@PathParam("node") final String node,
-			@PathParam("criteria") final String criteria) throws IOException {
+			@PathParam("criteria") final String criteria) {
 		final Map<String, String> parameters = pvResource.getNodeParameters(node);
 		final CurlRequest request = new CurlRequest(HttpMethod.GET, getApiUrl() + "search/repositories?per_page=10&q="
 				+ criteria + "+user:" + parameters.get(PARAMETER_USER), null);
@@ -158,7 +149,7 @@ public class GithubPluginResource extends AbstractToolPluginResource implements 
 			// Map the result
 			final List<GitHubRepository> result = objectMapper.convertValue(
 					objectMapper.readTree(request.getResponse()).get("items"),
-					new TypeReference<List<GitHubRepository>>() {
+					new TypeReference<>() {
 						// Nothing to extend
 					});
 			return result.stream().map(repo -> new NamedBean<>(repo.getName(), repo.getName())).toList();
