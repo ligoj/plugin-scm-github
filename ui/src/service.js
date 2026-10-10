@@ -16,7 +16,7 @@
  *
  * Kept free of Vue SFC imports so it can be unit-tested without a DOM.
  */
-import { renderServiceLink, renderDetailsChip, useI18nStore } from '@ligoj/host'
+import { renderServiceLink, renderDetailsChip, useI18nStore, remoteSearchField } from '@ligoj/host'
 
 const PARAM_USER = 'service:scm:github:user'
 const PARAM_REPO = 'service:scm:github:repository'
@@ -39,4 +39,16 @@ function renderDetailsKey(subscription) {
   return renderDetailsChip({ icon: 'mdi-github', text: repo, title: t('service:scm:github:repository') })
 }
 
-export default { renderFeatures, renderDetailsKey }
+// Subscribe-wizard input: the repositories of the selected instance, searched as the user types
+const RepositoryField = remoteSearchField({ path: 'rest/service/scm/github/repos', allowNew: true })
+
+/**
+ * Subscribe-wizard hook: `service:scm:github:repository` is picked among the repositories.
+ * Null for every other parameter and when editing a node: the default
+ * type-based input is rendered.
+ */
+function parameterField({ parameter, isNode } = {}) {
+  return !isNode && parameter?.id === PARAM_REPO ? RepositoryField : null
+}
+
+export default { renderFeatures, renderDetailsKey, parameterField }
