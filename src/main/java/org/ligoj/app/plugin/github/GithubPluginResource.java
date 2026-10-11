@@ -2,6 +2,8 @@ package org.ligoj.app.plugin.github;
 
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
+import org.apache.hc.core5.http.ClassicHttpResponse;
+import org.apache.hc.core5.http.Header;
 import org.ligoj.app.api.SubscriptionStatusWithData;
 import org.ligoj.app.plugin.github.client.GitHubContributor;
 import org.ligoj.app.plugin.github.client.GitHubRepository;
@@ -11,6 +13,7 @@ import org.ligoj.app.resource.plugin.AbstractToolPluginResource;
 import org.ligoj.bootstrap.core.NamedBean;
 import org.ligoj.bootstrap.core.curl.CurlProcessor;
 import org.ligoj.bootstrap.core.curl.CurlRequest;
+import org.ligoj.bootstrap.core.curl.DefaultHttpResponseCallback;
 import org.ligoj.bootstrap.core.validation.ValidationJsonException;
 import org.ligoj.bootstrap.resource.system.configuration.ConfigurationResource;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,9 +21,17 @@ import org.springframework.stereotype.Component;
 import tools.jackson.core.type.TypeReference;
 import tools.jackson.databind.ObjectMapper;
 
+import java.io.IOException;
+import java.time.Instant;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
+import java.util.concurrent.atomic.AtomicReference;
 
 
 /**
@@ -171,4 +182,73 @@ public class GithubPluginResource extends AbstractToolPluginResource implements 
 		}
 	}
 
+	/**
+	 * Response header of the GitHub API giving the expiry of the token used by the request. Absent for a token without
+	 * expiry.
+	 */
+	static final String EXPIRATION_HEADER = "GitHub-Authentication-Token-Expiration";
+
+	/**
+	 * Response header of GitHub Enterprise Server, which may not send {@link #EXPIRATION_HEADER} at all.
+	 */
+	static final String ENTERPRISE_HEADER = "X-GitHub-Enterprise-Version";
+
+	/**
+	 * Formats of {@link #EXPIRATION_HEADER}: <code>2026-11-30 12:00:00 UTC</code> or <code>2026-11-30 13:00:00 +0100</code>.
+	 */
+	private static final List<DateTimeFormatter> EXPIRATION_FORMATS = List.of(
+			DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss z", Locale.ENGLISH),
+			DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss Z", Locale.ENGLISH));
+
+	/**
+	 * Return the expiry of the token of this node. Overrides <code>ToolPlugin#getCredentialExpiry</code> of an API
+	 * having the credential expiry, without <code>@Override</code>: this plug-in still builds and runs on an older API,
+	 * which never calls it.
+	 *
+	 * @param node       The node identifier.
+	 * @param parameters The node parameters.
+	 * @return The expiry, {@link Instant#MAX} for a token without expiry, <code>null</code> when unknown, such as a
+	 *         GitHub Enterprise Server not sending the expiry.
+	 */
+	public Instant getCredentialExpiry(final String node, final Map<String, String> parameters) {
+		// The same authenticated call as the status check, reading the expiry header
+		final var expiration = new AtomicReference<String>();
+		final var enterprise = new AtomicReference<>(false);
+		final var callback = new DefaultHttpResponseCallback() {
+			@Override
+			public boolean onResponse(final CurlRequest request, final ClassicHttpResponse response) throws IOException {
+				Optional.ofNullable(response.getFirstHeader(EXPIRATION_HEADER)).map(Header::getValue).ifPresent(expiration::set);
+				enterprise.set(response.containsHeader(ENTERPRISE_HEADER));
+				return super.onResponse(request, response);
+			}
+		};
+		final var request = new CurlRequest(HttpMethod.GET, getApiUrl() + "users/" + parameters.get(PARAMETER_USER), null,
+				callback);
+		if (!processGitHubRequest(request, parameters)) {
+			// Rejected token: unknown expiry
+			return null;
+		}
+		if (expiration.get() == null) {
+			// GitHub tells a token without expiry by the absence of the header, GitHub Enterprise Server may not tell
+			return Boolean.TRUE.equals(enterprise.get()) ? null : Instant.MAX;
+		}
+		return parseExpiration(expiration.get());
+	}
+
+	/**
+	 * Parse a value of {@link #EXPIRATION_HEADER}.
+	 *
+	 * @param value The header value.
+	 * @return The expiry instant, <code>null</code> when the format is unknown.
+	 */
+	static Instant parseExpiration(final String value) {
+		for (final var format : EXPIRATION_FORMATS) {
+			try {
+				return ZonedDateTime.parse(value.trim(), format).toInstant();
+			} catch (final DateTimeParseException _) {
+				// Try the next format
+			}
+		}
+		return null;
+	}
 }

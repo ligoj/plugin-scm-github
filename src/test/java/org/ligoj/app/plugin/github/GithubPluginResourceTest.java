@@ -1,9 +1,12 @@
 package org.ligoj.app.plugin.github;
 
+import java.time.Instant;
+import org.ligoj.app.api.ToolPlugin;
 import jakarta.transaction.Transactional;
 import org.apache.commons.io.IOUtils;
 import org.apache.hc.core5.http.HttpStatus;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -201,4 +204,78 @@ class GithubPluginResourceTest extends AbstractServerTest {
 		Assertions.assertEquals(0, projects.size());
 	}
 
+	private static final String NODE = "service:scm:github:dig";
+
+	private void stubUser(final String header, final int status) {
+		var response = aResponse().withStatus(status).withBody("{}");
+		if (header != null) {
+			response = response.withHeader("GitHub-Authentication-Token-Expiration", header);
+		}
+		httpServer.stubFor(get(urlPathEqualTo("/users/junit")).willReturn(response));
+		httpServer.start();
+	}
+
+	private Instant getCredentialExpiry(final String header, final int status) {
+		stubUser(header, status);
+		return resource.getCredentialExpiry(NODE, subscriptionResource.getParametersNoCheck(subscription));
+	}
+
+	@Test
+	void getCredentialExpiry() {
+		Assertions.assertEquals(Instant.parse("2026-11-30T12:00:00Z"),
+				getCredentialExpiry("2026-11-30 12:00:00 UTC", HttpStatus.SC_OK));
+	}
+
+	@Test
+	void getCredentialExpiryOffset() {
+		Assertions.assertEquals(Instant.parse("2026-11-30T12:00:00Z"),
+				getCredentialExpiry("2026-11-30 13:00:00 +0100", HttpStatus.SC_OK));
+	}
+
+	@Test
+	void getCredentialExpiryNever() {
+		// No header: a token without expiry
+		Assertions.assertEquals(Instant.MAX, getCredentialExpiry(null, HttpStatus.SC_OK));
+	}
+
+	@Test
+	void getCredentialExpiryEnterprise() {
+		// GitHub Enterprise Server may not send the expiry header at all: its absence tells nothing there
+		httpServer.stubFor(get(urlPathEqualTo("/users/junit")).willReturn(
+				aResponse().withStatus(HttpStatus.SC_OK).withBody("{}").withHeader("X-GitHub-Enterprise-Version", "3.12.0")));
+		httpServer.start();
+		Assertions.assertNull(resource.getCredentialExpiry(NODE, subscriptionResource.getParametersNoCheck(subscription)));
+	}
+
+	@Test
+	void getCredentialExpiryEnterpriseExpiring() {
+		httpServer.stubFor(get(urlPathEqualTo("/users/junit")).willReturn(aResponse().withStatus(HttpStatus.SC_OK).withBody("{}")
+				.withHeader("X-GitHub-Enterprise-Version", "3.12.0")
+				.withHeader("GitHub-Authentication-Token-Expiration", "2026-11-30 12:00:00 UTC")));
+		httpServer.start();
+		Assertions.assertEquals(Instant.parse("2026-11-30T12:00:00Z"),
+				resource.getCredentialExpiry(NODE, subscriptionResource.getParametersNoCheck(subscription)));
+	}
+
+	@Test
+	void getCredentialExpiryThroughApi() throws Exception {
+		// Built against an API without this feature, the method overrides the API's one when it exists
+		final var method = java.util.Arrays.stream(ToolPlugin.class.getMethods())
+				.filter(m -> "getCredentialExpiry".equals(m.getName())).findFirst();
+		Assumptions.assumeTrue(method.isPresent(), "API without the credential expiry");
+		stubUser("2026-11-30 12:00:00 UTC", HttpStatus.SC_OK);
+		Assertions.assertEquals(Instant.parse("2026-11-30T12:00:00Z"),
+				method.get().invoke(resource, NODE, subscriptionResource.getParametersNoCheck(subscription)));
+	}
+
+	@Test
+	void getCredentialExpiryUnparsable() {
+		// Unknown, never "never expires"
+		Assertions.assertNull(getCredentialExpiry("soon", HttpStatus.SC_OK));
+	}
+
+	@Test
+	void getCredentialExpiryRejected() {
+		Assertions.assertNull(getCredentialExpiry(null, HttpStatus.SC_UNAUTHORIZED));
+	}
 }
